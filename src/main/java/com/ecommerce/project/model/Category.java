@@ -1,8 +1,18 @@
 package com.ecommerce.project.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+//@Entity(name="cats")
+@Entity
 public class Category {
+    @Id
     private Long categoryId;
     private String categoryName;
+
+    protected Category() {
+
+    }
 
     public Category(Long categoryId, String categoryName) {
         this.categoryId = categoryId;
