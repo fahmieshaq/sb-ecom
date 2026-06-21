@@ -22,10 +22,10 @@ public class MyGlobalExceptionHandler {
             response.put(fieldName, message);
         });
 
-        return new ResponseEntity<Map<String, String>>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ResourceNotFoundException.class) // our cstom exception ResourceNotFoundException
+    @ExceptionHandler(ResourceNotFoundException.class) // our custom exception ResourceNotFoundException
     public ResponseEntity<String> myResourceNotFoundException(ResourceNotFoundException e) {
         String message = e.getMessage();
         return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
