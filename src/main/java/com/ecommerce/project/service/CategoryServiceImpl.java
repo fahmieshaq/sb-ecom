@@ -2,7 +2,10 @@ package com.ecommerce.project.service;
 
 import com.ecommerce.project.exceptions.APIException;
 import com.ecommerce.project.model.Category;
+import com.ecommerce.project.payload.CategoryDTO;
+import com.ecommerce.project.payload.CategoryResponse;
 import com.ecommerce.project.repository.CategoryRespository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,23 +23,41 @@ public class CategoryServiceImpl implements CategoryService{
     @Autowired
     private CategoryRespository categoryRespository;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     @Override
-    public List<Category> getAllCategories() {
+    public CategoryResponse getAllCategories() {
         List<Category> categories = categoryRespository.findAll();
         if (categories.isEmpty())
             throw new APIException("No categories created till now");
 
-        return categories;
+        // For every category in the list, we are mapping that category
+        // to CategoryDTO. We are using the concept of stream because
+        // we are using categories in a list. Then for every category (map)
+        // we are using modelMapper to convert category object to the type
+        // CategoryDTO and then we are converting CateogryDTO to a list
+        List<CategoryDTO> categoryDTOS = categories.stream()
+                .map(category -> modelMapper.map(category, CategoryDTO.class))
+                .toList();
+
+        CategoryResponse categoryResponse = new CategoryResponse();
+        categoryResponse.setContent(categoryDTOS);
+
+        return categoryResponse;
     }
 
     @Override
-    public void createCategory(Category category) {
-        Category savedCat = categoryRespository.findByCategoryName(category.getCategoryName());
-        if(savedCat != null)
+    public CategoryDTO createCategory(CategoryDTO categoryDTO) {
+        Category category = modelMapper.map(categoryDTO, Category.class);
+        Category categoryFromDb = categoryRespository.findByCategoryName(category.getCategoryName());
+        if(categoryFromDb != null)
             throw new APIException("Category " + category.getCategoryName() + " already exists");
 
         //category.setCategoryId(nextId++);
-        categoryRespository.save(category);
+        Category savedCat = categoryRespository.save(category);
+        CategoryDTO savedCategoryDTO = modelMapper.map(savedCat, CategoryDTO.class);
+        return savedCategoryDTO;
     }
 
     @Override
